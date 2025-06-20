@@ -1,28 +1,20 @@
 # -----------------------------------------------------------------------------
-#  Dockerfile for ConnectWise API Gateway MCP (Python version)
+#  Dockerfile for ConnectWise API Gateway MCP
 # -----------------------------------------------------------------------------
+FROM python:3.11-slim            # Small, modern Python base image
 
-# 1. Use a small, recent Python base image
-FROM python:3.11-slim
+WORKDIR /app                     # All work happens in /app
 
-# 2. Create a working directory inside the container
-WORKDIR /app
-
-# 3. Install Python packages
+# ----- install Python packages -----
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Copy the rest of the project files into the container
+# ----- copy the rest of the source code -----
 COPY . .
 
-# 5. Ensure logs appear immediately (no buffering)
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1           # Show logs immediately
+EXPOSE 3333                      # Fly will route traffic here
 
-# 6. Expose the port the server will listen on
-EXPOSE 3333
-
-# 7. Start the FastAPI server with Uvicorn
-#    - "api_gateway_server:app"  →  module path : FastAPI instance
-#    - "--host 0.0.0.0"         →  listen on all interfaces (required by Fly)
-#    - "--port 3333"            →  must match Fly’s internal port
+# ----- start FastAPI with Uvicorn -----
+# api_gateway_server:app  →  module : FastAPI instance
 CMD ["uvicorn", "api_gateway_server:app", "--host", "0.0.0.0", "--port", "3333"]
