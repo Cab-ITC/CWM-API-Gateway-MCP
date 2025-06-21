@@ -30,8 +30,10 @@ docs/
 .idea/
 
 # Logs
+api_gateway/api_gateway.log
 *.log
 
 # OS specific files
 .DS_Store
 Thumbs.db
+
