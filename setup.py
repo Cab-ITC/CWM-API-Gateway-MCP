@@ -10,7 +10,7 @@ setup(
     install_requires=[
         "mcp>=1.3.0",
         "httpx>=0.23.0",
-        "pydantic>=1.10.0",
+        "pydantic>=2.7",
         "aiohttp>=3.8.4",
     ],
     entry_points={

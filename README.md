@@ -349,33 +349,39 @@ automatically switches to `streamable-http`. You can also explicitly set
 
 ### HTTP Session Handling
 
-When running with `FASTMCP_TRANSPORT=streamable-http`, the first HTTP response
-includes an `mcp-session-id` header. Capture this value and send it with all
-subsequent JSON-RPC requests to maintain state. Responses to JSON-RPC messages
-are returned with a `202 Accepted` status while the result is streamed back.
-Include `-ContentType 'application/json'` when calling `Invoke-WebRequest` so
-the server parses the JSON-RPC body correctly.
+When running with `FASTMCP_TRANSPORT=streamable-http`, the server listens for
+POST requests on the `/mcp` endpoint. The first response includes an
+`mcp-session-id` header. **Capture this header and provide it on all following
+POSTs** to maintain state. Responses are returned with a `202 Accepted` status
+while the result streams back. Include `-ContentType 'application/json'` when
+calling `Invoke-WebRequest` so the server parses the JSON-RPC body correctly.
 
 #### Example Using PowerShell
 
 ```powershell
-$resp = Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post -ContentType 'application/json' -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
+$resp = Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post \
+  -ContentType 'application/json' \
+  -Headers @{ 'Accept' = 'application/json, text/event-stream' } \
+  -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
 $sessionId = $resp.Headers['mcp-session-id']
 
 Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post \
   -ContentType 'application/json' \
-  -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}' \
-  -Headers @{ 'mcp-session-id' = $sessionId }
+  -Headers @{ 'mcp-session-id' = $sessionId; 'Accept' = 'application/json, text/event-stream' } \
+  -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
 ```
 
 #### Example Using curl
 
 ```bash
 SESSION=$(curl -i -X POST http://localhost:3333/mcp \
+  -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"system.describe"}' 2>/dev/null | \
   grep -i 'mcp-session-id' | awk -F': ' '{print $2}' | tr -d '\r')
 
-curl -H "mcp-session-id: $SESSION" -X POST http://localhost:3333/mcp \
+curl -X POST http://localhost:3333/mcp \
+  -H "mcp-session-id: $SESSION" \
+  -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
 ```
 
