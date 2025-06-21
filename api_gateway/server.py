@@ -442,13 +442,12 @@ async def natural_language_api_search(query: str, max_results: int = 5) -> str:
             description = endpoint.get('description', 'No description available')
             category = endpoint.get('category', 'Unknown')
             
-            formatted_results.append(
-                "".join([
-                    f"{i}. {method} {path}\n",
-                    f"   Category: {category}\n",
-                    f"   Description: {description}"
-                ])
+            formatted_result = (
+                f"{i}. {method} {path}\n"
+                f"   Category: {category}\n"
+                f"   Description: {description}"
             )
+            formatted_results.append(formatted_result)
         
         response = "Based on your query, here are the most relevant API endpoints:\n\n"
         response += "\n\n".join(formatted_results)
