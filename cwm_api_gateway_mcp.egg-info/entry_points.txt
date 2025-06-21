@@ -1,2 +1,0 @@
-[console_scripts]
-cwm-api-gateway-mcp = api_gateway_server:main
