@@ -133,19 +133,15 @@ For manual installation:
 
 After installing on any platform (Windows, macOS, or Linux), complete the following steps:
 
-#### 1. (Optional) Build the API Database
+#### 1. Build the API Database
 
-This repository already includes a pre-built database, so this step is optional. Only run this if you need to use a newer ConnectWise API definition file:
+Generate the SQLite database used for API discovery from the `manage.json` definition file. Run this command from the repository root:
 
 ```bash
-# On Windows
-python build_database.py path/to/manage.json
-
-# On macOS/Linux
-python3 build_database.py path/to/manage.json
+python build_database.py manage.json
 ```
 
-This step only needs to be done once, or whenever the ConnectWise API definition changes.
+The script creates `api_gateway/connectwise_api.db`. Re-run it whenever you update `manage.json`.
 
 #### 2. Configure API Credentials
 
@@ -192,11 +188,15 @@ Configure how the MCP server starts by setting these environment variables:
 
 ```
 FASTMCP_TRANSPORT=stdio    # Use 'streamable-http' for an HTTP server
+                           # If PORT is set and FASTMCP_TRANSPORT isn't,
+                           # the server defaults to HTTP
 FASTMCP_PORT=3333          # Defaults to the PORT variable if set
 ```
 
-When deploying to Fly.io, set `FASTMCP_TRANSPORT=streamable-http` so the server
-listens over HTTP.
+When deploying to Fly.io, the platform sets a `PORT` environment variable. If
+`FASTMCP_TRANSPORT` isn't specified the server will automatically listen over
+HTTP. You can still set `FASTMCP_TRANSPORT=streamable-http` explicitly if
+desired.
 
 ## Hosting on Fly.io
 
@@ -343,9 +343,50 @@ python api_gateway_server.py
 python3 api_gateway_server.py
 ```
 
-By default the server uses the `stdio` transport. Set `FASTMCP_TRANSPORT=streamable-http`
-and optionally `FASTMCP_PORT` to run an HTTP server (useful when deploying to
-services like Fly.io).
+By default the server uses the `stdio` transport. If a `PORT` environment
+variable is detected and `FASTMCP_TRANSPORT` isn't specified, the server
+automatically switches to `streamable-http`. You can also explicitly set
+
+### HTTP Session Handling
+
+When running with `FASTMCP_TRANSPORT=streamable-http`, the server listens for
+POST requests on the `/mcp` endpoint. The first response includes an
+`mcp-session-id` header. **Capture this header and provide it on all following
+POSTs** to maintain state. Responses are returned with a `202 Accepted` status
+while the result streams back. Include `-ContentType 'application/json'` when
+calling `Invoke-WebRequest` so the server parses the JSON-RPC body correctly.
+
+#### Example Using PowerShell
+
+```powershell
+$resp = Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post \
+  -ContentType 'application/json' \
+  -Headers @{ 'Accept' = 'application/json, text/event-stream' } \
+  -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
+$sessionId = $resp.Headers['mcp-session-id']
+
+Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post \
+  -ContentType 'application/json' \
+  -Headers @{ 'mcp-session-id' = $sessionId; 'Accept' = 'application/json, text/event-stream' } \
+  -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
+```
+
+#### Example Using curl
+
+```bash
+SESSION=$(curl -i -X POST http://localhost:3333/mcp \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"system.describe"}' 2>/dev/null | \
+  grep -i 'mcp-session-id' | awk -F': ' '{print $2}' | tr -d '\r')
+
+curl -X POST http://localhost:3333/mcp \
+  -H "mcp-session-id: $SESSION" \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
+```
+
+`FASTMCP_TRANSPORT=streamable-http` and optionally `FASTMCP_PORT` to control the
+HTTP port (useful when deploying to services like Fly.io).
 
 ## Available Tools
 
@@ -503,9 +544,9 @@ Error: Database file not found at [path]
 Please run build_database.py script first to generate the database
 ```
 
-**Solution:** Run the `build_database.py` script with the path to your ConnectWise API definition file:
+**Solution:** Run the `build_database.py` script using the included `manage.json` file:
 ```bash
-python build_database.py path/to/manage.json
+python build_database.py manage.json
 ```
 
 #### API Authentication Issues
@@ -529,6 +570,14 @@ Request timed out. ConnectWise API may be slow to respond.
 - Check your internet connection
 - The ConnectWise API may be experiencing high load
 - For large data requests, consider adding more specific filters to your query
+
+#### Invalid Request Parameters
+
+```
+Invalid request parameters
+```
+
+**Solution:** Verify that `-ContentType 'application/json'` is used and ensure the JSON body is correctly formatted so it can be parsed.
 
 ### Logs and Diagnostics
 

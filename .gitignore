@@ -1,7 +1,39 @@
+# Git related files
+.git
+.github
+.gitignore
+
+# Backup files
+*-bk-*
+
+# Python virtual environments
+venv/
+env/
+.env/
+
+# Python cache files
 __pycache__/
-*.pyc
-*.log
-*.db
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
 *.egg-info/
 
+# Unit test files
+test_*.py
+
+# Documentation
+docs/
+
+# Editor specific files
+.vscode/
+.idea/
+
+# Logs
 api_gateway/api_gateway.log
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
