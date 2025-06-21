@@ -1,0 +1,8 @@
+# Ignore Python cache and build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Ignore logs and databases
+*.log
+*.db
