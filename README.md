@@ -186,6 +186,35 @@ The final HTTP headers sent with every request will look like:
 'Content-Type': 'application/json'
 ```
 
+## Hosting on Fly.io
+
+1. Install the [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) and log in:
+   ```bash
+   fly auth login
+   ```
+2. Ensure `fly.toml` sets the correct app name:
+   ```toml
+   app = "cwm-api-gateway-mcp"
+   ```
+3. Set your ConnectWise credentials as Fly secrets:
+   ```bash
+   fly secrets set CONNECTWISE_API_URL=... CONNECTWISE_COMPANY_ID=... \
+       CONNECTWISE_PUBLIC_KEY=... CONNECTWISE_PRIVATE_KEY=... \
+       CONNECTWISE_AUTH_PREFIX=...
+   ```
+4. Deploy the application:
+   ```bash
+   fly deploy
+   ```
+5. Note the Fly URL (e.g., `https://cwm-api-gateway-mcp.fly.dev`) for the next step.
+
+### Adding as a ChatGPT Deep Research Connector
+
+1. In ChatGPT, enable the **Connectors** beta feature.
+2. Add a new connector and enter your Fly URL from above.
+3. Provide any authentication headers if required.
+
+
 ## Configuration for Claude Desktop
 
 There are two methods to integrate with Claude Desktop:
