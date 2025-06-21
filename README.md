@@ -133,19 +133,15 @@ For manual installation:
 
 After installing on any platform (Windows, macOS, or Linux), complete the following steps:
 
-#### 1. (Optional) Build the API Database
+#### 1. Build the API Database
 
-This repository already includes a pre-built database, so this step is optional. Only run this if you need to use a newer ConnectWise API definition file:
+Generate the SQLite database used for API discovery from the `manage.json` definition file. Run this command from the repository root:
 
 ```bash
-# On Windows
-python build_database.py path/to/manage.json
-
-# On macOS/Linux
-python3 build_database.py path/to/manage.json
+python build_database.py manage.json
 ```
 
-This step only needs to be done once, or whenever the ConnectWise API definition changes.
+The script creates `api_gateway/connectwise_api.db`. Re-run it whenever you update `manage.json`.
 
 #### 2. Configure API Credentials
 
@@ -509,9 +505,9 @@ Error: Database file not found at [path]
 Please run build_database.py script first to generate the database
 ```
 
-**Solution:** Run the `build_database.py` script with the path to your ConnectWise API definition file:
+**Solution:** Run the `build_database.py` script using the included `manage.json` file:
 ```bash
-python build_database.py path/to/manage.json
+python build_database.py manage.json
 ```
 
 #### API Authentication Issues
