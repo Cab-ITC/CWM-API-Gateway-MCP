@@ -192,11 +192,15 @@ Configure how the MCP server starts by setting these environment variables:
 
 ```
 FASTMCP_TRANSPORT=stdio    # Use 'streamable-http' for an HTTP server
+                           # If PORT is set and FASTMCP_TRANSPORT isn't,
+                           # the server defaults to HTTP
 FASTMCP_PORT=3333          # Defaults to the PORT variable if set
 ```
 
-When deploying to Fly.io, set `FASTMCP_TRANSPORT=streamable-http` so the server
-listens over HTTP.
+When deploying to Fly.io, the platform sets a `PORT` environment variable. If
+`FASTMCP_TRANSPORT` isn't specified the server will automatically listen over
+HTTP. You can still set `FASTMCP_TRANSPORT=streamable-http` explicitly if
+desired.
 
 ## Hosting on Fly.io
 
@@ -343,9 +347,11 @@ python api_gateway_server.py
 python3 api_gateway_server.py
 ```
 
-By default the server uses the `stdio` transport. Set `FASTMCP_TRANSPORT=streamable-http`
-and optionally `FASTMCP_PORT` to run an HTTP server (useful when deploying to
-services like Fly.io).
+By default the server uses the `stdio` transport. If a `PORT` environment
+variable is detected and `FASTMCP_TRANSPORT` isn't specified, the server
+automatically switches to `streamable-http`. You can also explicitly set
+`FASTMCP_TRANSPORT=streamable-http` and optionally `FASTMCP_PORT` to control the
+HTTP port (useful when deploying to services like Fly.io).
 
 ## Available Tools
 

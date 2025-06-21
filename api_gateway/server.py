@@ -709,14 +709,19 @@ def main():
     initialize_database()
     initialize_fast_memory()
 
-    transport_env = os.environ.get("FASTMCP_TRANSPORT", "stdio").lower()
+    port_env = os.environ.get("FASTMCP_PORT") or os.environ.get("PORT")
+
+    transport_env = os.environ.get("FASTMCP_TRANSPORT")
+    if not transport_env:
+        if os.environ.get("PORT"):
+            transport_env = "streamable-http"
+        else:
+            transport_env = "stdio"
     transport = (
         "streamable-http"
-        if transport_env in {"streamable-http", "http"}
+        if transport_env.lower() in {"streamable-http", "http"}
         else "stdio"
     )
-
-    port_env = os.environ.get("FASTMCP_PORT") or os.environ.get("PORT")
     if port_env:
         try:
             mcp.settings.port = int(port_env)
