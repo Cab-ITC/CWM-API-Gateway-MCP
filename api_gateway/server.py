@@ -708,7 +708,25 @@ def main():
     setup_config()
     initialize_database()
     initialize_fast_memory()
-    mcp.run(transport='stdio')
+
+    transport_env = os.environ.get("FASTMCP_TRANSPORT", "stdio").lower()
+    transport = (
+        "streamable-http"
+        if transport_env in {"streamable-http", "http"}
+        else "stdio"
+    )
+
+    port_env = os.environ.get("FASTMCP_PORT") or os.environ.get("PORT")
+    if port_env:
+        try:
+            mcp.settings.port = int(port_env)
+        except ValueError:
+            logger.warning(f"Invalid port value '{port_env}', using default {mcp.settings.port}")
+
+    if transport == "streamable-http":
+        mcp.settings.host = os.environ.get("FASTMCP_HOST", "0.0.0.0")
+
+    mcp.run(transport=transport)
     
 if __name__ == "__main__":
     main()

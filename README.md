@@ -186,6 +186,18 @@ The final HTTP headers sent with every request will look like:
 'Content-Type': 'application/json'
 ```
 
+#### 3. (Optional) Server Settings
+
+Configure how the MCP server starts by setting these environment variables:
+
+```
+FASTMCP_TRANSPORT=stdio    # Use 'streamable-http' for an HTTP server
+FASTMCP_PORT=3333          # Defaults to the PORT variable if set
+```
+
+When deploying to Fly.io, set `FASTMCP_TRANSPORT=streamable-http` so the server
+listens over HTTP.
+
 ## Hosting on Fly.io
 
 1. Install the [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) and log in:
@@ -330,6 +342,10 @@ python api_gateway_server.py
 # On macOS/Linux
 python3 api_gateway_server.py
 ```
+
+By default the server uses the `stdio` transport. Set `FASTMCP_TRANSPORT=streamable-http`
+and optionally `FASTMCP_PORT` to run an HTTP server (useful when deploying to
+services like Fly.io).
 
 ## Available Tools
 
