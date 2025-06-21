@@ -346,6 +346,36 @@ python3 api_gateway_server.py
 By default the server uses the `stdio` transport. If a `PORT` environment
 variable is detected and `FASTMCP_TRANSPORT` isn't specified, the server
 automatically switches to `streamable-http`. You can also explicitly set
+
+### HTTP Session Handling
+
+When running with `FASTMCP_TRANSPORT=streamable-http`, the first HTTP response
+includes an `mcp-session-id` header. Capture this value and send it with all
+subsequent JSON-RPC requests to maintain state. Responses to JSON-RPC messages
+are returned with a `202 Accepted` status while the result is streamed back.
+
+#### Example Using PowerShell
+
+```powershell
+$resp = Invoke-WebRequest -Uri http://localhost:3333/ -Method Post -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
+$sessionId = $resp.Headers['mcp-session-id']
+
+Invoke-WebRequest -Uri http://localhost:3333/ -Method Post \
+  -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}' \
+  -Headers @{ 'mcp-session-id' = $sessionId }
+```
+
+#### Example Using curl
+
+```bash
+SESSION=$(curl -i -X POST http://localhost:3333/ \
+  -d '{"jsonrpc":"2.0","id":1,"method":"system.describe"}' 2>/dev/null | \
+  grep -i 'mcp-session-id' | awk -F': ' '{print $2}' | tr -d '\r')
+
+curl -H "mcp-session-id: $SESSION" -X POST http://localhost:3333/ \
+  -d '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
+```
+
 `FASTMCP_TRANSPORT=streamable-http` and optionally `FASTMCP_PORT` to control the
 HTTP port (useful when deploying to services like Fly.io).
 
