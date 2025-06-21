@@ -5,6 +5,7 @@ dockerfile = "Dockerfile"
 
 [env]
   PORT = "3333"
+  FASTMCP_TRANSPORT = "streamable-http"
 
 [[services]]
   internal_port = 3333
