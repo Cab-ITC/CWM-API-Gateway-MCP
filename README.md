@@ -359,10 +359,10 @@ the server parses the JSON-RPC body correctly.
 #### Example Using PowerShell
 
 ```powershell
-$resp = Invoke-WebRequest -Uri http://localhost:3333/ -Method Post -ContentType 'application/json' -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
+$resp = Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post -ContentType 'application/json' -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
 $sessionId = $resp.Headers['mcp-session-id']
 
-Invoke-WebRequest -Uri http://localhost:3333/ -Method Post \
+Invoke-WebRequest -Uri http://localhost:3333/mcp -Method Post \
   -ContentType 'application/json' \
   -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}' \
   -Headers @{ 'mcp-session-id' = $sessionId }
@@ -371,11 +371,11 @@ Invoke-WebRequest -Uri http://localhost:3333/ -Method Post \
 #### Example Using curl
 
 ```bash
-SESSION=$(curl -i -X POST http://localhost:3333/ \
+SESSION=$(curl -i -X POST http://localhost:3333/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"system.describe"}' 2>/dev/null | \
   grep -i 'mcp-session-id' | awk -F': ' '{print $2}' | tr -d '\r')
 
-curl -H "mcp-session-id: $SESSION" -X POST http://localhost:3333/ \
+curl -H "mcp-session-id: $SESSION" -X POST http://localhost:3333/mcp \
   -d '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}'
 ```
 
