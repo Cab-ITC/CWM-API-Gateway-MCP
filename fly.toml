@@ -1,4 +1,4 @@
-app = "cw-mcp"
+app = "cwm-api-gateway-mcp"
 
 [build]
 dockerfile = "Dockerfile"
