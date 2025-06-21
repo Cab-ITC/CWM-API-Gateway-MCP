@@ -353,14 +353,17 @@ When running with `FASTMCP_TRANSPORT=streamable-http`, the first HTTP response
 includes an `mcp-session-id` header. Capture this value and send it with all
 subsequent JSON-RPC requests to maintain state. Responses to JSON-RPC messages
 are returned with a `202 Accepted` status while the result is streamed back.
+Include `-ContentType 'application/json'` when calling `Invoke-WebRequest` so
+the server parses the JSON-RPC body correctly.
 
 #### Example Using PowerShell
 
 ```powershell
-$resp = Invoke-WebRequest -Uri http://localhost:3333/ -Method Post -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
+$resp = Invoke-WebRequest -Uri http://localhost:3333/ -Method Post -ContentType 'application/json' -Body '{"jsonrpc":"2.0","id":1,"method":"system.describe"}'
 $sessionId = $resp.Headers['mcp-session-id']
 
 Invoke-WebRequest -Uri http://localhost:3333/ -Method Post \
+  -ContentType 'application/json' \
   -Body '{"jsonrpc":"2.0","id":2,"method":"search_api_endpoints","params":{"query":"tickets"}}' \
   -Headers @{ 'mcp-session-id' = $sessionId }
 ```
