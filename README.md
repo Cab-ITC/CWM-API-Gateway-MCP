@@ -192,10 +192,14 @@ The final HTTP headers sent with every request will look like:
    ```bash
    fly auth login
    ```
-2. Ensure `fly.toml` sets the correct app name:
+2. Ensure `fly.toml` sets the correct app name and port:
    ```toml
    app = "cwm-api-gateway-mcp"
+
+   [env]
+     FASTMCP_PORT = "3333"
    ```
+   The Docker image exposes the same port and the server runs in HTTP mode by default.
 3. Set your ConnectWise credentials as Fly secrets:
    ```bash
    fly secrets set CONNECTWISE_API_URL=... CONNECTWISE_COMPANY_ID=... \

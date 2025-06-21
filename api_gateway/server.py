@@ -708,7 +708,7 @@ def main():
     setup_config()
     initialize_database()
     initialize_fast_memory()
-    mcp.run(transport='stdio')
+    mcp.run(transport='streamable-http')
     
 if __name__ == "__main__":
     main()
