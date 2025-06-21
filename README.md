@@ -562,6 +562,14 @@ Request timed out. ConnectWise API may be slow to respond.
 - The ConnectWise API may be experiencing high load
 - For large data requests, consider adding more specific filters to your query
 
+#### Invalid Request Parameters
+
+```
+Invalid request parameters
+```
+
+**Solution:** Verify that `-ContentType 'application/json'` is used and ensure the JSON body is correctly formatted so it can be parsed.
+
 ### Logs and Diagnostics
 
 #### Log Locations
